@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lentera Pustaka</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+<style>body{font-family:'Poppins',sans-serif}.font-judul{font-family:'Merriweather',serif}</style>
+</head>
+<body class="bg-[#FEF9F0] min-h-screen">
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white w-full max-w-5xl rounded-[2rem] shadow-xl overflow-hidden flex flex-col md:flex-row">
+    <div class="bg-[#1A1A1A] text-white p-10 md:w-[45%] flex flex-col justify-between">
+      <div>
+        <h1 class="font-judul text-4xl leading-tight">Lentera<br>Pustaka</h1>
+        <p class="mt-4 text-white/60">Tempat cahaya ilmu menyala. Kelola ribuan buku dengan mudah.</p>
+      </div>
+      <div class="mt-10 p-4 bg-white/10 rounded-xl text-sm">
+        <p class="font-semibold">Akun Demo:</p>
+        <p>User: admin<br>Pass: lentera123</p>
+      </div>
+    </div>
+    <div class="p-10 md:w-[55%]">
+      <h2 class="text-2xl font-bold">Selamat Datang Kembali</h2>
+      <p class="text-gray-500 text-sm mt-1">Silakan login untuk mengelola perpustakaan</p>
+      <form id="loginForm" class="mt-8 space-y-4">
+        <input id="username" type="text" placeholder="Username" class="w-full p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+        <input id="password" type="password" placeholder="Password" class="w-full p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+        <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 font-semibold p-4 rounded-xl transition">Masuk ke Perpustakaan</button>
+        <p id="loginError" class="text-red-500 text-sm hidden">Username atau password salah!</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appPage" class="hidden">
+  <nav class="bg-white border-b sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="font-judul font-bold text-xl">📚 Lentera Pustaka</h1>
+      <div class="flex gap-2">
+        <button onclick="switchTab('buku')" id="tab-buku" class="px-4 py-2 rounded-full bg-black text-white text-sm">Daftar Buku</button>
+        <button onclick="switchTab('pinjam')" id="tab-pinjam" class="px-4 py-2 rounded-full bg-gray-100 text-sm">Peminjaman <span id="badgePinjam" class="bg-red-500 text-white px-2 rounded-full text-xs">0</span></button>
+        <button onclick="logout()" class="px-4 py-2 text-sm text-red-500">Keluar</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 py-6">
+    <!-- TAB BUKU -->
+    <div id="view-buku">
+      <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+        <input id="searchBuku" placeholder="Cari judul, penulis, kategori..." class="w-full md:w-96 p-3 rounded-full border bg-white">
+        <select id="filterKategori" class="p-3 rounded-full border bg-white">
+          <option value="semua">Semua Kategori</option>
+          <option>Novel</option><option>Edukasi</option><option>Sejarah</option><option>Sains</option><option>Anak</option><option>Agama</option>
+        </select>
+      </div>
+      <div id="daftarBuku" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5"></div>
+    </div>
+
+    <!-- TAB PINJAM -->
+    <div id="view-pinjam" class="hidden">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl p-6">
+          <h3 class="font-bold text-lg mb-4">Sedang Dipinjam</h3>
+          <div id="listPinjam" class="space-y-3"></div>
+        </div>
+        <div class="bg-white rounded-2xl p-6">
+          <h3 class="font-bold text-lg mb-4">Riwayat Pengembalian</h3>
+          <div id="listKembali" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL PINJAM -->
+<div id="modalPinjam" class="hidden fixed inset-0 bg-black/50 z-30 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6">
+    <h3 class="font-bold text-lg">Form Peminjaman Buku</h3>
+    <p id="modalJudulBuku" class="text-sm text-gray-500 mb-4"></p>
+    <form id="formPinjam" class="space-y-3">
+      <input id="namaPeminjam" placeholder="Nama Lengkap Peminjam" class="w-full p-3 rounded-xl border" required>
+      <input id="kontakPeminjam" placeholder="Kelas / No. HP / NIS" class="w-full p-3 rounded-xl border" required>
+      <input id="tglPinjam" type="date" class="w-full p-3 rounded-xl border" required>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeModal()" class="flex-1 p-3 rounded-xl bg-gray-100">Batal</button>
+        <button type="submit" class="flex-1 p-3 rounded-xl bg-amber-400 font-semibold">Konfirmasi Pinjam</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const bukuData = [
+  {id:1,judul:"Bumi Manusia",penulis:"Pramoedya Ananta Toer",kategori:"Novel",cover:"https://covers.openlibrary.org/b/id/12878526-L.jpg",stok:3},
+  {id:2,judul:"Laskar Pelangi",penulis:"Andrea Hirata",kategori:"Novel",cover:"https://covers.openlibrary.org/b/id/10523466-L.jpg",stok:5},
+  {id:3,judul:"Filosofi Teras",penulis:"Henry Manampiring",kategori:"Edukasi",cover:"https://covers.openlibrary.org/b/id/13150364-L.jpg",stok:2},
+  {id:4,judul:"Sapiens",penulis:"Yuval Noah Harari",kategori:"Sejarah",cover:"https://covers.openlibrary.org/b/id/12870273-L.jpg",stok:4},
+  {id:5,judul:"Atomic Habits",penulis:"James Clear",kategori:"Edukasi",cover:"https://covers.openlibrary.org/b/id/12801131-L.jpg",stok:6},
+  {id:6,judul:"Laut Bercerita",penulis:"Leila S. Chudori",kategori:"Novel",cover:"https://covers.openlibrary.org/b/id/13585563-L.jpg",stok:3},
+  {id:7,judul:"Negeri 5 Menara",penulis:"A. Fuadi",kategori:"Novel",cover:"https://covers.openlibrary.org/b/id/12662293-L.jpg",stok:4},
+  {id:8,judul:"Doraemon Vol 1",penulis:"Fujiko F. Fujio",kategori:"Anak",cover:"https://covers.openlibrary.org/b/id/12806412-L.jpg",stok:10},
+  {id:9,judul:"Sejarah Islam",penulis:"Prof. Ahmad Mansur",kategori:"Agama",cover:"https://covers.openlibrary.org/b/id/12829200-L.jpg",stok:2},
+  {id:10,judul:"Kosmos",penulis:"Carl Sagan",kategori:"Sains",cover:"https://covers.openlibrary.org/b/id/8228691-L.jpg",stok:3},
+  {id:11,judul:"Cantik Itu Luka",penulis:"Eka Kurniawan",kategori:"Novel",cover:"https://covers.openlibrary.org/b/id/12870853-L.jpg",stok:2},
+  {id:12,judul:"Biologi Sel",penulis:"Dr. Campbell",kategori:"Sains",cover:"https://covers.openlibrary.org/b/id/12749853-L.jpg",stok:5},
+  {id:13,judul:"Si Kancil",penulis:"Dongeng Nusantara",kategori:"Anak",cover:"https://covers.openlibrary.org/b/id/12941490-L.jpg",stok:8},
+  {id:14,judul:"Tahajud Cinta",penulis:"Habiburrahman",kategori:"Agama",cover:"https://covers.openlibrary.org/b/id/13132416-L.jpg",stok:3},
+  {id:15,judul:"Majapahit",penulis:"Herald",kategori:"Sejarah",cover:"https://covers.openlibrary.org/b/id/12662299-L.jpg",stok:2},
+  {id:16,judul:"Matematika Asyik",penulis:"Prof. Yohanes",kategori:"Edukasi",cover:"https://covers.openlibrary.org/b/id/12829477-L.jpg",stok:7},
+  {id:17,judul:"One Piece 101",penulis:"Eiichiro Oda",kategori:"Anak",cover:"https://covers.openlibrary.org/b/id/13140144-L.jpg",stok:9},
+  {id:18,judul:"Hujan",penulis:"Tere Liye",kategori:"Novel",cover:"https://covers.openlibrary.org/b/id/12801132-L.jpg",stok:4},
+  {id:19,judul:"Ensiklopedia Sains",penulis:"National Geo",kategori:"Sains",cover:"https://covers.openlibrary.org/b/id/12750712-L.jpg",stok:3},
+  {id:20,judul:"Sirah Nabawiyah",penulis:"Ibnu Hisyam",kategori:"Agama",cover:"https://covers.openlibrary.org/b/id/13120120-L.jpg",stok:4},
+  {id:21,judul:"Pulang",penulis:"Tere Liye",kategori:"Novel",cover:"https://covers.openlibrary.org/b/id/12768078-L.jpg",stok:3},
+  {id:22,judul:"Gajah Mada",penulis:"Langit Kresna",kategori:"Sejarah",cover:"https://covers.openlibrary.org/b/id/12829390-L.jpg",stok:2},
+  {id:23,judul:"Belajar Coding",penulis:"Petani Kode",kategori:"Edukasi",cover:"https://covers.openlibrary.org/b/id/12829500-L.jpg",stok:5},
+  {id:24,judul:"Kancil & Buaya",penulis:"Cerita Rakyat",kategori:"Anak",cover:"https://covers.openlibrary.org/b/id/12941491-L.jpg",stok:6},
+];
+
+let pinjamData = JSON.parse(localStorage.getItem('lentera_pinjam')||'[]');
+let kembaliData = JSON.parse(localStorage.getItem('lentera_kembali')||'[]');
+let selectedBook = null;
+
+document.getElementById('loginForm').onsubmit = (e)=>{
+  e.preventDefault();
+  if(document.getElementById('username').value==='admin' && document.getElementById('password').value==='lentera123'){
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('appPage').classList.remove('hidden');
+    renderBuku(); renderPinjam();
+  } else document.getElementById('loginError').classList.remove('hidden');
+}
+function logout(){ location.reload(); }
+function switchTab(tab){
+  document.getElementById('view-buku').classList.toggle('hidden', tab!=='buku');
+  document.getElementById('view-pinjam').classList.toggle('hidden', tab!=='pinjam');
+  document.getElementById('tab-buku').className = tab==='buku'? 'px-4 py-2 rounded-full bg-black text-white text-sm' : 'px-4 py-2 rounded-full bg-gray-100 text-sm';
+  document.getElementById('tab-pinjam').className = tab==='pinjam'? 'px-4 py-2 rounded-full bg-black text-white text-sm' : 'px-4 py-2 rounded-full bg-gray-100 text-sm';
+}
+function renderBuku(){
+  const q = document.getElementById('searchBuku').value.toLowerCase();
+  const kat = document.getElementById('filterKategori').value;
+  const filtered = bukuData.filter(b => (b.judul.toLowerCase().includes(q) || b.penulis.toLowerCase().includes(q)) && (kat==='semua' || b.kategori===kat));
+  document.getElementById('daftarBuku').innerHTML = filtered.map(b=>{
+    const dipinjam = pinjamData.filter(p=>p.bookId===b.id).length;
+    const sisa = b.stok - dipinjam;
+    return `<div class="bg-white rounded-2xl p-3 shadow-sm">
+      <img src="${b.cover}" class="w-full h-48 object-cover rounded-xl">
+      <div class="mt-3">
+        <span class="text-[10px] px-2 py-1 bg-amber-100 rounded-full">${b.kategori}</span>
+        <h4 class="font-semibold text-sm mt-2 leading-tight line-clamp-2">${b.judul}</h4>
+        <p class="text-xs text-gray-500">${b.penulis}</p>
+        <p class="text-xs mt-1 ${sisa>0?'text-green-600':'text-red-500'}">Stok: ${sisa} / ${b.stok}</p>
+        <button ${sisa<=0?'disabled':''} onclick="openModal(${b.id})" class="mt-3 w-full p-2 rounded-full text-xs font-semibold ${sisa>0?'bg-black text-white':'bg-gray-200 text-gray-400'}">${sisa>0?'Pinjam Buku':'Habis Dipinjam'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openModal(id){
+  selectedBook = bukuData.find(b=>b.id===id);
+  document.getElementById('modalJudulBuku').innerText = selectedBook.judul + ' - ' + selectedBook.penulis;
+  document.getElementById('tglPinjam').valueAsDate = new Date();
+  document.getElementById('modalPinjam').classList.remove('hidden');
+}
+function closeModal(){ document.getElementById('modalPinjam').classList.add('hidden'); }
+
+document.getElementById('formPinjam').onsubmit = (e)=>{
+  e.preventDefault();
+  const data = { id: Date.now(), bookId: selectedBook.id, judul: selectedBook.judul, cover: selectedBook.cover, nama: document.getElementById('namaPeminjam').value, kontak: document.getElementById('kontakPeminjam').value, tglPinjam: document.getElementById('tglPinjam').value, tgl: new Date().toLocaleString('id-ID') };
+  pinjamData.push(data); localStorage.setItem('lentera_pinjam', JSON.stringify(pinjamData));
+  closeModal(); renderBuku(); renderPinjam(); e.target.reset(); switchTab('pinjam');
+}
+
+function renderPinjam(){
+  document.getElementById('badgePinjam').innerText = pinjamData.length;
+  document.getElementById('listPinjam').innerHTML = pinjamData.length? pinjamData.map(p=>`<div class="flex gap-3 p-3 border rounded-xl">
+    <img src="${p.cover}" class="w-12 h-16 object-cover rounded">
+    <div class="flex-1"><p class="font-semibold text-sm">${p.judul}</p><p class="text-xs">Peminjam: <b>${p.nama}</b> (${p.kontak})</p><p class="text-[11px] text-gray-500">Pinjam: ${p.tglPinjam}</p>
+    <button onclick="kembalikan(${p.id})" class="mt-2 px-3 py-1 bg-green-500 text-white rounded-full text-xs">Konfirmasi Kembali</button></div></div>`).join('') : '<p class="text-sm text-gray-400">Tidak ada buku dipinjam</p>';
+  document.getElementById('listKembali').innerHTML = kembaliData.length? kembaliData.map(k=>`<div class="flex gap-3 p-3 bg-green-50 border border-green-100 rounded-xl"><img src="${k.cover}" class="w-12 h-16 object-cover rounded"><div><p class="font-semibold text-sm">${k.judul}</p><p class="text-xs">${k.nama} - Sudah Kembali</p><p class="text-[11px] text-gray-500">Dikembalikan: ${k.tglKembali}</p></div></div>`).join('') : '<p class="text-sm text-gray-400">Belum ada pengembalian</p>';
+}
+function kembalikan(id){
+  const idx = pinjamData.findIndex(p=>p.id===id);
+  const data = pinjamData[idx];
+  data.tglKembali = new Date().toLocaleString('id-ID');
+  kembaliData.unshift(data); pinjamData.splice(idx,1);
+  localStorage.setItem('lentera_pinjam', JSON.stringify(pinjamData));
+  localStorage.setItem('lentera_kembali', JSON.stringify(kembaliData));
+  renderBuku(); renderPinjam();
+}
+document.getElementById('searchBuku').oninput = renderBuku;
+document.getElementById('filterKategori').onchange = renderBuku;
+</script>
+</body>
+</html>
